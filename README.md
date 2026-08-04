@@ -1,38 +1,32 @@
-# Pixellar Spaces
+# Pixellar Spaces — Update 2
 
-Public rental homes and office-space marketplace for Hyderabad and Bengaluru.
+Public rental marketplace plus a secure Supabase-powered admin dashboard.
 
-## Deploy on Vercel
+## Included
 
-1. Create a new empty GitHub repository named `pixellar-spaces`.
-2. Extract this ZIP on your computer.
-3. Upload every extracted file and folder to the repository root.
-4. In Vercel, choose **Add New → Project**.
-5. Import the `pixellar-spaces` GitHub repository.
-6. Keep **Framework Preset: Next.js** and leave all build settings unchanged.
-7. Select **Deploy**.
+- Public Hyderabad and Bengaluru property search
+- Database-backed active property listings
+- Stored visit, tenant-requirement and owner-listing enquiries
+- WhatsApp handoff after every enquiry
+- Email/password admin login at `/admin`
+- Property add, edit, publish/draft/rented status, and delete
+- Lead pipeline status tracking and WhatsApp follow-up
+- Supabase Row Level Security policies
+- Safe fallback listings until Supabase is connected
 
-No environment variables or database setup are required for this version.
+## Required one-time setup
 
-## Update 1
+Follow `UPDATE-2-SETUP-GUIDE.txt` in order. Run `supabase-setup.sql` in the
+Supabase SQL Editor, create the admin user, authorize that user, and add the two
+public Supabase variables to Vercel.
 
-- Schedule Visit automatically selects the chosen property's city and space type.
-- Owner, tenant and visit forms create a structured WhatsApp lead for +91 78938 17322.
-- Scheduled-visit messages automatically include the property title and property ID.
+## Local development
 
-## Run locally
+Copy `.env.example` to `.env.local`, insert your Supabase values, then run:
 
 ```bash
 npm install
 npm run dev
 ```
 
-Open `http://localhost:3000`.
-
-## Production build
-
-```bash
-npm run build
-```
-
-Future commits pushed to the connected GitHub branch will deploy automatically on Vercel.
+Production build verified with `npm run build` on 5 August 2026.

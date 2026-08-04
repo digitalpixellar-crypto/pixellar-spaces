@@ -1,0 +1,63 @@
+"use client";
+
+import { FormEvent, useCallback, useEffect, useState } from "react";
+import Link from "next/link";
+import { isSupabaseConfigured, supabase } from "@/lib/supabase";
+
+type Lead = { id:string; lead_type:string; property_title:string|null; full_name:string; phone:string; city:string; space_type:string; locality_budget:string|null; details:string|null; status:string; created_at:string };
+type Property = { id:string; property_code:string; title:string; city:string; property_type:string; locality:string; rent:string; specs:string[]; badge:string; availability:string; status:string };
+const statuses = ["new","contacted","visit_scheduled","qualified","closed","lost"];
+
+export default function AdminPage() {
+  const [loading,setLoading]=useState(true), [signedIn,setSignedIn]=useState(false), [allowed,setAllowed]=useState(false);
+  const [email,setEmail]=useState(""), [password,setPassword]=useState(""), [notice,setNotice]=useState("");
+  const [tab,setTab]=useState<"leads"|"properties">("leads"), [leads,setLeads]=useState<Lead[]>([]), [properties,setProperties]=useState<Property[]>([]);
+  const [editing,setEditing]=useState<Property|null>(null), [showPropertyForm,setShowPropertyForm]=useState(false);
+
+  const loadData=useCallback(async()=>{
+    if(!supabase) return;
+    const [{data:leadRows},{data:propertyRows}] = await Promise.all([
+      supabase.from("leads").select("*").order("created_at",{ascending:false}),
+      supabase.from("properties").select("*").order("created_at",{ascending:false}),
+    ]);
+    setLeads((leadRows||[]) as Lead[]); setProperties((propertyRows||[]) as Property[]);
+  },[]);
+
+  useEffect(()=>{(async()=>{
+    if(!supabase){setLoading(false);return;}
+    const {data:{session}}=await supabase.auth.getSession();
+    setSignedIn(Boolean(session));
+    if(session){
+      const {data}=await supabase.from("admin_users").select("user_id").eq("user_id",session.user.id).maybeSingle();
+      setAllowed(Boolean(data)); if(data) await loadData();
+    }
+    setLoading(false);
+  })()},[loadData]);
+
+  async function login(e:FormEvent){e.preventDefault();if(!supabase)return;setNotice("Signing in…");
+    const {data,error}=await supabase.auth.signInWithPassword({email,password});
+    if(error){setNotice(error.message);return} setSignedIn(true);
+    const {data:admin}=await supabase.from("admin_users").select("user_id").eq("user_id",data.user.id).maybeSingle();
+    if(!admin){setAllowed(false);setNotice("This account is not authorized for the admin dashboard.");return}
+    setAllowed(true);setNotice("");await loadData();
+  }
+  async function logout(){await supabase?.auth.signOut();setSignedIn(false);setAllowed(false);}
+  async function updateLead(id:string,status:string){if(!supabase)return;await supabase.from("leads").update({status}).eq("id",id);setLeads(v=>v.map(x=>x.id===id?{...x,status}:x));}
+  async function deleteLead(id:string){if(!supabase||!confirm("Delete this lead permanently?"))return;await supabase.from("leads").delete().eq("id",id);setLeads(v=>v.filter(x=>x.id!==id));}
+  async function deleteProperty(id:string){if(!supabase||!confirm("Delete this property permanently?"))return;await supabase.from("properties").delete().eq("id",id);setProperties(v=>v.filter(x=>x.id!==id));}
+  async function saveProperty(e:FormEvent<HTMLFormElement>){e.preventDefault();if(!supabase)return;const d=new FormData(e.currentTarget);
+    const record={property_code:String(d.get("property_code")),title:String(d.get("title")),city:String(d.get("city")),property_type:String(d.get("property_type")),locality:String(d.get("locality")),rent:String(d.get("rent")),specs:String(d.get("specs")).split(",").map(x=>x.trim()).filter(Boolean),badge:String(d.get("badge")),availability:String(d.get("availability")),status:String(d.get("status"))};
+    const result=editing?await supabase.from("properties").update(record).eq("id",editing.id):await supabase.from("properties").insert(record);
+    if(result.error){setNotice(result.error.message);return} setEditing(null);setShowPropertyForm(false);setNotice("Property saved.");await loadData();
+  }
+
+  if(loading)return <main className="admin-shell"><div className="admin-login">Loading…</div></main>;
+  if(!isSupabaseConfigured)return <main className="admin-shell"><div className="admin-login"><div className="brand"><span className="brand-mark">P</span><span>Pixellar <b>Spaces</b></span></div><h1>Connect Supabase first</h1><p>Add the two variables from <code>.env.example</code> to Vercel, then redeploy.</p><Link href="/">← Back to website</Link></div></main>;
+  if(!signedIn||!allowed)return <main className="admin-shell"><form className="admin-login" onSubmit={login}><div className="brand"><span className="brand-mark">P</span><span>Pixellar <b>Spaces</b></span></div><span className="kicker">SECURE TEAM ACCESS</span><h1>Admin dashboard</h1><p>Sign in with your authorized Pixellar Spaces account.</p><label>Email<input type="email" required value={email} onChange={e=>setEmail(e.target.value)} /></label><label>Password<input type="password" required value={password} onChange={e=>setPassword(e.target.value)} /></label>{notice&&<div className="admin-notice">{notice}</div>}<button className="orange-btn">Sign in</button><Link href="/">← Back to website</Link></form></main>;
+
+  const newCount=leads.filter(x=>x.status==="new").length, visitCount=leads.filter(x=>x.lead_type==="visit").length;
+  return <main className="dashboard"><aside><div className="brand light"><span className="brand-mark">P</span><span>Pixellar <b>Spaces</b></span></div><nav><button className={tab==="leads"?"active":""} onClick={()=>setTab("leads")}>Enquiries & visits <b>{newCount}</b></button><button className={tab==="properties"?"active":""} onClick={()=>setTab("properties")}>Properties <b>{properties.length}</b></button></nav><Link href="/">View public website ↗</Link><button className="logout" onClick={logout}>Sign out</button></aside><section className="dash-main"><header><div><span className="kicker">OPERATIONS CENTER</span><h1>{tab==="leads"?"Leads & visits":"Property inventory"}</h1></div>{tab==="properties"&&<button className="orange-btn" onClick={()=>{setEditing(null);setShowPropertyForm(true)}}>+ Add property</button>}</header>
+  {notice&&<div className="dash-notice">{notice}</div>}
+  {tab==="leads"?<><div className="stat-grid"><div><small>Total enquiries</small><strong>{leads.length}</strong></div><div><small>New leads</small><strong>{newCount}</strong></div><div><small>Visit requests</small><strong>{visitCount}</strong></div><div><small>Closed</small><strong>{leads.filter(x=>x.status==="closed").length}</strong></div></div><div className="data-card"><div className="data-head"><b>Recent enquiries</b><span>Newest first</span></div>{leads.length?leads.map(l=><article className="lead-row" key={l.id}><div className="lead-type">{l.lead_type==="visit"?"VISIT":l.lead_type.toUpperCase()}</div><div><strong>{l.full_name}</strong><span>{l.phone} · {l.city} · {l.space_type}</span><small>{l.property_title||l.locality_budget||"General enquiry"}</small></div><select value={l.status} onChange={e=>updateLead(l.id,e.target.value)}>{statuses.map(s=><option key={s} value={s}>{s.replace("_"," ")}</option>)}</select><a href={`https://wa.me/91${l.phone.replace(/\D/g,"").slice(-10)}`} target="_blank">WhatsApp</a><button className="danger-link" onClick={()=>deleteLead(l.id)}>Delete</button></article>):<div className="dash-empty">No enquiries yet. New website submissions will appear here.</div>}</div></>:<div className="data-card"><div className="data-head"><b>All properties</b><span>{properties.filter(x=>x.status==="active").length} active</span></div>{properties.map(p=><article className="property-row" key={p.id}><div className="property-code">{p.property_code}</div><div><strong>{p.title}</strong><span>{p.locality} · {p.property_type}</span></div><b>{p.rent}</b><span className={`status ${p.status}`}>{p.status}</span><button onClick={()=>{setEditing(p);setShowPropertyForm(true)}}>Edit</button><button className="danger-link" onClick={()=>deleteProperty(p.id)}>Delete</button></article>)}</div>}
+  </section>{showPropertyForm&&<div className="modal-backdrop" onMouseDown={()=>setShowPropertyForm(false)}><form className="modal property-form" onSubmit={saveProperty} onMouseDown={e=>e.stopPropagation()}><button type="button" className="modal-close" onClick={()=>setShowPropertyForm(false)}>×</button><span className="kicker">PROPERTY INVENTORY</span><h2>{editing?"Edit property":"Add a property"}</h2><div className="field-row"><label>Property ID<input name="property_code" required defaultValue={editing?.property_code}/></label><label>Status<select name="status" defaultValue={editing?.status||"active"}><option>active</option><option>draft</option><option>rented</option></select></label></div><label>Property title<input name="title" required defaultValue={editing?.title}/></label><div className="field-row"><label>City<select name="city" defaultValue={editing?.city||"Hyderabad"}><option>Hyderabad</option><option>Bengaluru</option></select></label><label>Type<select name="property_type" defaultValue={editing?.property_type||"Home"}><option>Home</option><option>Office</option></select></label></div><label>Locality<input name="locality" required defaultValue={editing?.locality}/></label><div className="field-row"><label>Monthly rent<input name="rent" required defaultValue={editing?.rent}/></label><label>Badge<input name="badge" defaultValue={editing?.badge||"Verified"}/></label></div><label>Specifications (comma separated)<input name="specs" defaultValue={editing?.specs?.join(", ")}/></label><label>Availability<input name="availability" defaultValue={editing?.availability||"Ready now"}/></label><button className="orange-btn">Save property</button></form></div>}</main>;
+}

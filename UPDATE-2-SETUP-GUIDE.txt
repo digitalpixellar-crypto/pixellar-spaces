@@ -1,0 +1,87 @@
+PIXELLAR SPACES — UPDATE 2 SETUP GUIDE
+======================================
+
+PART A — UPDATE GITHUB
+
+1. Extract Pixellar-Spaces-Update-2.zip.
+2. Open GitHub and enter your pixellar-spaces repository.
+3. Click Add file > Upload files.
+4. Upload everything INSIDE the extracted folder.
+5. If GitHub asks, allow it to replace the existing files.
+6. Commit message: Add Supabase database and admin dashboard
+7. Click Commit changes.
+
+The public website will remain usable with sample properties while you complete
+the Supabase steps below.
+
+PART B — CREATE SUPABASE PROJECT
+
+1. Open https://supabase.com and sign in.
+2. Click New project.
+3. Project name: pixellar-spaces
+4. Create and safely save a strong database password.
+5. Select the closest region and click Create new project.
+6. Wait until the project is ready.
+
+PART C — CREATE DATABASE TABLES AND SECURITY
+
+1. In Supabase, click SQL Editor in the left menu.
+2. Click New query.
+3. Open supabase-setup.sql from this folder.
+4. Copy its complete contents into the SQL Editor.
+5. Click Run.
+6. Confirm that it says Success.
+
+PART D — CREATE YOUR ADMIN LOGIN
+
+1. In Supabase, go to Authentication > Users.
+2. Click Add user > Create new user.
+3. Enter the email you want to use for the Pixellar Spaces admin.
+4. Create a strong password and keep Auto Confirm User enabled.
+5. Click Create user.
+6. Open the new user and copy the User UID.
+7. Return to SQL Editor > New query.
+8. Paste the following, replacing both values:
+
+insert into public.admin_users (user_id, email, full_name)
+values ('PASTE-USER-UID-HERE', 'YOUR-ADMIN-EMAIL', 'Yeswanth Reddy');
+
+9. Click Run and confirm Success.
+
+IMPORTANT: A Supabase login is not automatically an admin. The SQL step above
+is what authorizes the account. Do not share the password or Supabase service
+role key.
+
+PART E — CONNECT VERCEL TO SUPABASE
+
+1. In Supabase, open Project Settings > API.
+2. Copy Project URL.
+3. Copy the anon/public key (never use service_role in Vercel or website code).
+4. Open Vercel > pixellar-spaces > Settings > Environment Variables.
+5. Add:
+   NEXT_PUBLIC_SUPABASE_URL = your Project URL
+6. Add:
+   NEXT_PUBLIC_SUPABASE_ANON_KEY = your anon/public key
+7. Enable Production, Preview and Development for both.
+8. Save both variables.
+9. Open Vercel > Deployments.
+10. Open the latest deployment menu and click Redeploy.
+
+PART F — TEST UPDATE 2
+
+1. Open https://pixellar-spaces.vercel.app and hard-refresh with Ctrl+Shift+R.
+2. Submit one Schedule Visit form.
+3. Complete the WhatsApp handoff.
+4. Open https://pixellar-spaces.vercel.app/admin.
+5. Sign in with the admin email and password created above.
+6. Confirm the new visit appears under Enquiries & visits.
+7. Change its status from new to contacted.
+8. Open Properties and add a test property as draft.
+9. Edit it to active and confirm it appears on the public website.
+
+SECURITY NOTES
+
+- Public visitors can see active properties and submit enquiries only.
+- Public visitors cannot read leads, edit properties, or open admin data.
+- Only users listed in admin_users can access operational records.
+- Keep the service_role key private; this application does not require it.
