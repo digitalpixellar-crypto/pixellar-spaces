@@ -1,0 +1,47 @@
+PIXELLAR SPACES - GITHUB AND VERCEL UPLOAD
+
+PART 1 - EXTRACT THE ZIP
+1. Download Pixellar-Spaces-Vercel.zip.
+2. Right-click it and select Extract All.
+3. Open the extracted Pixellar-Spaces-Vercel folder.
+
+PART 2 - CREATE THE GITHUB REPOSITORY
+1. Open https://github.com and sign in.
+2. Click the + button at the top-right.
+3. Select New repository.
+4. Repository name: pixellar-spaces
+5. Choose Public or Private. Both work with Vercel.
+6. Do not add a README, .gitignore, or licence because they are included here.
+7. Click Create repository.
+
+PART 3 - UPLOAD THE WEBSITE TO GITHUB
+1. On the empty repository page, click uploading an existing file.
+2. Open the extracted Pixellar-Spaces-Vercel folder on your computer.
+3. Select all items inside the folder. Upload the contents, not the outer folder.
+4. Drag all selected files and folders into the GitHub upload area.
+5. Wait until every file finishes uploading.
+6. Under Commit changes, enter: Initial Pixellar Spaces website
+7. Click Commit changes.
+
+PART 4 - DEPLOY WITH VERCEL
+1. Open https://vercel.com and sign in with GitHub.
+2. Click Add New, then Project.
+3. Find pixellar-spaces and click Import.
+4. Framework Preset should show Next.js.
+5. Root Directory should remain ./
+6. Leave Build Command, Output Directory, and Environment Variables unchanged.
+7. Click Deploy.
+8. Wait for the Congratulations screen, then click Visit.
+
+The Vercel URL is public and will open without a ChatGPT login.
+
+PART 5 - FUTURE WEBSITE UPDATES
+1. Open the pixellar-spaces repository on GitHub.
+2. Upload or edit the changed files.
+3. Commit the changes.
+4. Vercel will automatically create and publish the new deployment.
+
+IMPORTANT
+- Do not upload node_modules or .next folders.
+- No environment variables are required for this version.
+- The enquiry forms currently show an on-screen success message; they are not yet connected to email or a database.
