@@ -14,6 +14,12 @@ Public rental homes and office-space marketplace for Hyderabad and Bengaluru.
 
 No environment variables or database setup are required for this version.
 
+## Update 1
+
+- Schedule Visit automatically selects the chosen property's city and space type.
+- Owner, tenant and visit forms create a structured WhatsApp lead for +91 78938 17322.
+- Scheduled-visit messages automatically include the property title and property ID.
+
 ## Run locally
 
 ```bash

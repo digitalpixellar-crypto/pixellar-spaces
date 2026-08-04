@@ -25,6 +25,8 @@ export default function Home() {
   const [modal, setModal] = useState<"owner" | "requirement" | "visit" | null>(null);
   const [selected, setSelected] = useState<Property | null>(null);
   const [sent, setSent] = useState(false);
+  const [formCity, setFormCity] = useState("");
+  const [formType, setFormType] = useState("Rental home");
 
   const filtered = useMemo(() => properties.filter((p) =>
     (city === "All cities" || p.city === city) &&
@@ -33,7 +35,31 @@ export default function Home() {
   ), [city, kind, query]);
 
   const openModal = (name: typeof modal, property?: Property) => {
-    setSelected(property || null); setSent(false); setModal(name);
+    setSelected(property || null);
+    setFormCity(property?.city || "");
+    setFormType(property?.type === "Office" ? "Office space" : "Rental home");
+    setSent(false);
+    setModal(name);
+  };
+
+  const submitRequest = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const data = new FormData(event.currentTarget);
+    const requestLabel = modal === "visit" ? "Schedule a Visit" : modal === "owner" ? "Owner Property Listing" : "Space Requirement";
+    const message = [
+      `*New Pixellar Spaces Lead — ${requestLabel}*`,
+      selected ? `Property: ${selected.title}` : "",
+      selected ? `Property ID: PS-${String(selected.id).padStart(3, "0")}` : "",
+      `Name: ${data.get("name")}`,
+      `Phone: ${data.get("phone")}`,
+      `City: ${data.get("city")}`,
+      `Space: ${data.get("propertyType")}`,
+      `Locality / Budget: ${data.get("locality") || "Not provided"}`,
+      `Details: ${data.get("details") || "Not provided"}`,
+    ].filter(Boolean).join("\n");
+
+    window.open(`https://wa.me/917893817322?text=${encodeURIComponent(message)}`, "_blank", "noopener,noreferrer");
+    setSent(true);
   };
 
   return (
@@ -85,7 +111,7 @@ export default function Home() {
       <section className="cta"><div className="container"><div><span>READY WHEN YOU ARE</span><h2>Let’s find a space that works for you.</h2></div><button onClick={() => openModal("requirement")}>Share your requirement →</button></div></section>
       <footer><div className="container footer-grid"><div><div className="brand light"><span className="brand-mark">P</span><span>Pixellar <b>Spaces</b></span></div><p>Verified rental homes and ready-to-move office spaces in Hyderabad and Bengaluru.</p></div><div><b>Explore</b><a href="#properties">Rental homes</a><a href="#properties">Office spaces</a><a href="#how">How it works</a></div><div><b>For owners</b><a href="#manage">List a property</a><a href="#manage">Property management</a><a href="#manage">Partner with us</a></div><div><b>Contact</b><a href="tel:+917893817322">+91 78938 17322</a><a href="mailto:digitalpixellar@gmail.com">digitalpixellar@gmail.com</a><span>Hyderabad · Bengaluru</span></div></div><div className="container copyright">© 2026 Pixellar Spaces · A Digital Pixellar venture <span>Privacy · Terms</span></div></footer>
 
-      {modal && <div className="modal-backdrop" onMouseDown={() => setModal(null)}><div className="modal" onMouseDown={e => e.stopPropagation()}><button className="modal-close" onClick={() => setModal(null)}>×</button>{sent ? <div className="success"><span>✓</span><h2>Thank you!</h2><p>Your request has been received. Our spaces team will contact you shortly.</p><button className="dark-btn" onClick={() => setModal(null)}>Done</button></div> : <><span className="kicker">{modal === "owner" ? "PROPERTY OWNER" : modal === "visit" ? "SCHEDULE A VISIT" : "PERSONALISED SEARCH"}</span><h2>{modal === "owner" ? "List your property" : modal === "visit" ? `Visit ${selected?.title}` : "Tell us what you need"}</h2><p>Share a few details and our local team will take it from here.</p><form onSubmit={e => {e.preventDefault(); setSent(true)}}><div className="field-row"><label>Full name<input required placeholder="Your name"/></label><label>Phone number<input required type="tel" placeholder="+91"/></label></div><div className="field-row"><label>City<select required defaultValue=""><option value="" disabled>Select city</option><option>Hyderabad</option><option>Bengaluru</option></select></label><label>{modal === "owner" ? "Property type" : "Looking for"}<select><option>Rental home</option><option>Office space</option></select></label></div><label>{modal === "owner" ? "Property locality" : "Budget and preferred locality"}<input placeholder={modal === "owner" ? "e.g. Kondapur" : "e.g. ₹40,000, HSR Layout"}/></label><label>Anything else?<textarea placeholder="Move-in date, furnishing, size or other details"/></label><button className="orange-btn form-submit" type="submit">Submit request →</button></form></>}</div></div>}
+      {modal && <div className="modal-backdrop" onMouseDown={() => setModal(null)}><div className="modal" onMouseDown={e => e.stopPropagation()}><button className="modal-close" onClick={() => setModal(null)}>×</button>{sent ? <div className="success"><span>✓</span><h2>Thank you!</h2><p>Your request is ready in WhatsApp. Please tap send there to share it with our spaces team.</p><button className="dark-btn" onClick={() => setModal(null)}>Done</button></div> : <><span className="kicker">{modal === "owner" ? "PROPERTY OWNER" : modal === "visit" ? "SCHEDULE A VISIT" : "PERSONALISED SEARCH"}</span><h2>{modal === "owner" ? "List your property" : modal === "visit" ? `Visit ${selected?.title}` : "Tell us what you need"}</h2><p>Share a few details and our local team will take it from here.</p><form onSubmit={submitRequest}><div className="field-row"><label>Full name<input required name="name" placeholder="Your name"/></label><label>Phone number<input required name="phone" type="tel" inputMode="tel" placeholder="+91"/></label></div><div className="field-row"><label>City<select required name="city" value={formCity} onChange={e => setFormCity(e.target.value)}><option value="" disabled>Select city</option><option>Hyderabad</option><option>Bengaluru</option></select></label><label>{modal === "owner" ? "Property type" : "Looking for"}<select name="propertyType" value={formType} onChange={e => setFormType(e.target.value)}><option>Rental home</option><option>Office space</option></select></label></div><label>{modal === "owner" ? "Property locality" : "Budget and preferred locality"}<input name="locality" placeholder={modal === "owner" ? "e.g. Kondapur" : "e.g. ₹40,000, HSR Layout"}/></label><label>Anything else?<textarea name="details" placeholder="Move-in date, furnishing, size or other details"/></label><button className="orange-btn form-submit" type="submit">Continue on WhatsApp →</button></form></>}</div></div>}
     </main>
   );
 }
