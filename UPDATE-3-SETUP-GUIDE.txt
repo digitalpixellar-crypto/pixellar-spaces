@@ -1,0 +1,28 @@
+PIXELLAR SPACES — UPDATE 3
+
+IMPORTANT: Complete Step 1 before uploading the website files.
+
+STEP 1 — UPDATE SUPABASE
+1. Open Supabase > pixellar-spaces > SQL Editor.
+2. Click New query.
+3. Open UPDATE-3-DATABASE-MIGRATION.sql from this folder.
+4. Copy all code, paste it into SQL Editor, and click Run.
+5. Confirm: Success. No rows returned.
+
+STEP 2 — UPDATE GITHUB
+1. Open the pixellar-spaces GitHub repository.
+2. Click Add file > Upload files.
+3. Upload everything inside this extracted Update 3 folder.
+4. Do not upload the ZIP itself or node_modules/.next folders.
+5. Commit message: Build Update 3 property experience
+6. Vercel will deploy automatically.
+
+STEP 3 — TEST
+1. Wait for Vercel to show Ready / Production.
+2. Open /admin and sign in.
+3. Open Properties and edit a property.
+4. Add rent details, furnishing, amenities and photos, then save.
+5. Open the public website and select View details.
+6. Confirm photos, property information and WhatsApp visit action work.
+
+Update 3 preserves your existing Supabase project, administrator and leads.

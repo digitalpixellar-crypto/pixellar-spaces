@@ -7,6 +7,8 @@ type Property = {
   id: string; city: "Hyderabad" | "Bengaluru"; type: "Home" | "Office";
   title: string; location: string; rent: string; specs: string[]; theme: string;
   badge: string; available: string;
+  image_url?: string | null; bedrooms?: number | null; bathrooms?: number | null;
+  furnishing?: string | null; area_sqft?: number | null;
 };
 
 const fallbackProperties: Property[] = [
@@ -32,11 +34,13 @@ export default function Home() {
 
   useEffect(() => {
     if (!supabase) return;
-    supabase.from("properties").select("id,property_code,title,city,property_type,locality,rent,specs,badge,availability")
+    supabase.from("properties").select("id,property_code,title,city,property_type,locality,rent,specs,badge,availability,image_url,bedrooms,bathrooms,furnishing,area_sqft")
       .eq("status", "active").order("created_at", { ascending: false }).then(({ data }) => {
         if (data?.length) setProperties(data.map((p, index) => ({
           id: p.id, city: p.city, type: p.property_type, title: p.title, location: p.locality,
           rent: p.rent, specs: p.specs || [], badge: p.badge, available: p.availability,
+          image_url: p.image_url, bedrooms: p.bedrooms, bathrooms: p.bathrooms,
+          furnishing: p.furnishing, area_sqft: p.area_sqft,
           theme: ["home-one","office-one","office-two","home-two","home-three","office-three"][index % 6],
         })));
       });
@@ -123,8 +127,8 @@ export default function Home() {
         <div className="section-head"><div><span className="kicker">SPACES PICKED FOR YOU</span><h2>Fresh, verified listings</h2><p>Real properties. Current availability. No duplicate listings.</p></div><div className="filter-pills">{["All spaces","Home","Office"].map(v => <button key={v} className={kind === v ? "active" : ""} onClick={() => setKind(v)}>{v === "Home" ? "Homes" : v === "Office" ? "Offices" : v}</button>)}</div></div>
         <div className="property-grid">
           {filtered.map(p => <article className="property-card" key={p.id}>
-            <div className={`property-image ${p.theme}`}><span className="badge">✓ {p.badge}</span><button className={`heart ${saved.includes(p.id) ? "saved" : ""}`} onClick={() => setSaved(s => s.includes(p.id) ? s.filter(x => x !== p.id) : [...s, p.id])} aria-label="Save property">♥</button><div className="fake-room"><i/><b/><span/></div></div>
-            <div className="card-body"><div className="card-meta"><span>{p.type.toUpperCase()}</span><small>{p.available}</small></div><h3>{p.title}</h3><p className="pin">⌖ {p.location}</p><div className="specs">{p.specs.map(s => <span key={s}>{s}</span>)}</div><div className="price-row"><div><small>Monthly rent</small><strong>{p.rent}</strong></div><button onClick={() => openModal("visit", p)}>Schedule visit →</button></div></div>
+            <div className={`property-image ${p.theme}`} style={p.image_url ? {backgroundImage:`url(${p.image_url})`} : undefined}><span className="badge">✓ {p.badge}</span><button className={`heart ${saved.includes(p.id) ? "saved" : ""}`} onClick={() => setSaved(s => s.includes(p.id) ? s.filter(x => x !== p.id) : [...s, p.id])} aria-label="Save property">♥</button>{!p.image_url&&<div className="fake-room"><i/><b/><span/></div>}</div>
+            <div className="card-body"><div className="card-meta"><span>{p.type.toUpperCase()}</span><small>{p.available}</small></div><h3>{p.title}</h3><p className="pin">⌖ {p.location}</p><div className="specs">{p.specs.map(s => <span key={s}>{s}</span>)}</div><div className="price-row"><div><small>Monthly rent</small><strong>{p.rent}</strong></div><div className="card-actions"><a href={`/properties/${p.id}`}>View details</a><button onClick={() => openModal("visit", p)}>Schedule visit →</button></div></div></div>
           </article>)}
         </div>
         {!filtered.length && <div className="empty"><h3>No exact matches yet</h3><p>Share your requirement and our local team will find options for you.</p><button className="dark-btn" onClick={() => openModal("requirement")}>Share requirement</button></div>}
