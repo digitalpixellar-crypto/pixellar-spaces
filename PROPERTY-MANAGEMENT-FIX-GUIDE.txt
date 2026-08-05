@@ -1,0 +1,29 @@
+PIXELLAR SPACES — PROPERTY MANAGEMENT FIX
+
+No Supabase SQL or migration is required. Your existing properties remain unchanged.
+
+UPLOAD STEPS
+1. Extract Pixellar-Spaces-Property-Management-Fix.zip.
+2. Open the main page of your GitHub pixellar-spaces repository.
+3. Upload the extracted app folder, keeping the same folder structure.
+4. Confirm these existing files will be replaced:
+   - app/admin/page.tsx
+   - app/globals.css
+5. Commit with this message:
+   Restore property management with verification
+6. Wait for Vercel to show Ready / Production.
+7. Open /admin and press Ctrl + Shift + R.
+8. Open Properties and confirm your existing listings appear.
+
+RESTORED FEATURES
+- Existing property list and active/draft/rented status
+- Add property
+- Edit property details
+- Multiple-photo add, preview and removal
+- Delete property with confirmation
+- Verify and unverify controls
+- Update 4 visits, analytics and CSV features preserved
+
+SAFETY
+- Do not run any SQL for this fix.
+- Do not delete or re-add existing properties.

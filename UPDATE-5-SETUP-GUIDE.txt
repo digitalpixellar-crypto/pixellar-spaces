@@ -1,0 +1,45 @@
+PIXELLAR SPACES — UPDATE 5 SETUP
+
+WHAT THIS UPDATE ADDS
+- Owner Starter: Rs. 999/month
+- Owner Featured: Rs. 1,999/month
+- Broker Pro: Rs. 4,999/month
+- Razorpay Checkout with server-side order creation and signature verification
+- Subscription and payment records
+- Featured listing priority and badge
+- Listing expiry and 30-day renewal controls
+- Admin revenue center at /admin/billing
+- Meta WhatsApp Cloud API notification foundation
+
+SAFE INSTALL ORDER
+1. In Supabase SQL Editor, run UPDATE-5-DATABASE-MIGRATION.sql once.
+2. Confirm: Success. No rows returned.
+3. Upload all project files to the GitHub repository and replace matching files.
+4. Commit message: Add subscriptions payments and featured listings
+5. Wait for Vercel to show Ready / Production.
+6. Hard refresh the website.
+
+VERCEL ENVIRONMENT VARIABLES
+Keep the existing NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.
+Add these only in Vercel; never paste secret values into GitHub or screenshots:
+- SUPABASE_SERVICE_ROLE_KEY (Supabase project settings > API keys > service_role)
+- RAZORPAY_KEY_ID
+- RAZORPAY_KEY_SECRET
+- RAZORPAY_WEBHOOK_SECRET
+- WHATSAPP_PHONE_NUMBER_ID (optional until Meta setup is complete)
+- WHATSAPP_ACCESS_TOKEN (optional until Meta setup is complete)
+
+IMPORTANT
+- Start with Razorpay TEST keys. Do not use live keys until one successful test payment is confirmed.
+- The public Plans page works immediately. Checkout shows a safe activation message until Razorpay keys are added.
+- The WhatsApp endpoint stays safely disabled until Meta credentials are added.
+- Existing properties, owner submissions, leads, visits and admin login are not reset.
+
+TESTING
+1. Open /plans and confirm all three plans appear.
+2. Add Razorpay test keys and redeploy.
+3. Complete one Razorpay test payment.
+4. Open /admin/billing and confirm the subscription appears.
+5. Feature one property for 30 days.
+6. Confirm it moves above ordinary listings and shows Featured publicly.
+7. Set/extend a listing expiry and confirm the admin date changes.
