@@ -9,7 +9,7 @@ type Property = {
   title: string; location: string; rent: string; specs: string[]; theme: string;
   badge: string; available: string;
   image_url?: string | null; bedrooms?: number | null; bathrooms?: number | null;
-  furnishing?: string | null; area_sqft?: number | null;
+  furnishing?: string | null; area_sqft?: number | null; verified?: boolean;
 };
 
 const fallbackProperties: Property[] = [
@@ -35,13 +35,13 @@ export default function Home() {
 
   useEffect(() => {
     if (!supabase) return;
-    supabase.from("properties").select("id,property_code,title,city,property_type,locality,rent,specs,badge,availability,image_url,bedrooms,bathrooms,furnishing,area_sqft")
+    supabase.from("properties").select("id,property_code,title,city,property_type,locality,rent,specs,badge,availability,image_url,bedrooms,bathrooms,furnishing,area_sqft,verified")
       .eq("status", "active").order("created_at", { ascending: false }).then(({ data }) => {
         if (data?.length) setProperties(data.map((p, index) => ({
           id: p.id, city: p.city, type: p.property_type, title: p.title, location: p.locality,
           rent: p.rent, specs: p.specs || [], badge: p.badge, available: p.availability,
           image_url: p.image_url, bedrooms: p.bedrooms, bathrooms: p.bathrooms,
-          furnishing: p.furnishing, area_sqft: p.area_sqft,
+          furnishing: p.furnishing, area_sqft: p.area_sqft, verified: p.verified,
           theme: ["home-one","office-one","office-two","home-two","home-three","office-three"][index % 6],
         })));
       });
@@ -74,6 +74,7 @@ export default function Home() {
       `City: ${data.get("city")}`,
       `Space: ${data.get("propertyType")}`,
       `Locality / Budget: ${data.get("locality") || "Not provided"}`,
+      modal === "visit" ? `Preferred visit: ${data.get("visitDate") || "Date not selected"} ${data.get("visitTime") || ""}` : "",
       `Details: ${data.get("details") || "Not provided"}`,
     ].filter(Boolean).join("\n");
 
@@ -85,6 +86,7 @@ export default function Home() {
         full_name: String(data.get("name") || ""), phone: String(data.get("phone") || ""),
         city: String(data.get("city") || ""), space_type: String(data.get("propertyType") || ""),
         locality_budget: String(data.get("locality") || ""), details: String(data.get("details") || ""),
+        scheduled_at: modal === "visit" && data.get("visitDate") && data.get("visitTime") ? new Date(`${data.get("visitDate")}T${data.get("visitTime")}:00+05:30`).toISOString() : null,
       });
       if (error) console.error("Lead storage failed", error.message);
     }
@@ -128,7 +130,7 @@ export default function Home() {
         <div className="section-head"><div><span className="kicker">SPACES PICKED FOR YOU</span><h2>Fresh, verified listings</h2><p>Real properties. Current availability. No duplicate listings.</p></div><div className="filter-pills">{["All spaces","Home","Office"].map(v => <button key={v} className={kind === v ? "active" : ""} onClick={() => setKind(v)}>{v === "Home" ? "Homes" : v === "Office" ? "Offices" : v}</button>)}</div></div>
         <div className="property-grid">
           {filtered.map(p => <article className="property-card" key={p.id}>
-            <div className={`property-image ${p.theme}`} style={p.image_url ? {backgroundImage:`url(${p.image_url})`} : undefined}><span className="badge">✓ {p.badge}</span><button className={`heart ${saved.includes(p.id) ? "saved" : ""}`} onClick={() => setSaved(s => s.includes(p.id) ? s.filter(x => x !== p.id) : [...s, p.id])} aria-label="Save property">♥</button>{!p.image_url&&<div className="fake-room"><i/><b/><span/></div>}</div>
+            <div className={`property-image ${p.theme}`} style={p.image_url ? {backgroundImage:`url(${p.image_url})`} : undefined}><span className="badge">{p.verified ? "✓ Verified" : p.badge}</span><button className={`heart ${saved.includes(p.id) ? "saved" : ""}`} onClick={() => setSaved(s => s.includes(p.id) ? s.filter(x => x !== p.id) : [...s, p.id])} aria-label="Save property">♥</button>{!p.image_url&&<div className="fake-room"><i/><b/><span/></div>}</div>
             <div className="card-body"><div className="card-meta"><span>{p.type.toUpperCase()}</span><small>{p.available}</small></div><h3>{p.title}</h3><p className="pin">⌖ {p.location}</p><div className="specs">{p.specs.map(s => <span key={s}>{s}</span>)}</div><div className="price-row"><div><small>Monthly rent</small><strong>{p.rent}</strong></div><div className="card-actions"><a href={`/properties/${p.id}`}>View details</a><button onClick={() => openModal("visit", p)}>Schedule visit →</button></div></div></div>
           </article>)}
         </div>
@@ -142,7 +144,7 @@ export default function Home() {
       <section className="cta"><div className="container"><div><span>READY WHEN YOU ARE</span><h2>Let’s find a space that works for you.</h2></div><button onClick={() => openModal("requirement")}>Share your requirement →</button></div></section>
       <footer><div className="container footer-grid"><div><div className="brand light"><span className="brand-mark">P</span><span>Pixellar <b>Spaces</b></span></div><p>Verified rental homes and ready-to-move office spaces in Hyderabad and Bengaluru.</p></div><div><b>Explore</b><a href="#properties">Rental homes</a><a href="#properties">Office spaces</a><a href="#how">How it works</a></div><div><b>For owners</b><a href="#manage">List a property</a><a href="#manage">Property management</a><a href="/admin">Team login</a></div><div><b>Contact</b><a href="tel:+917893817322">+91 78938 17322</a><a href="mailto:digitalpixellar@gmail.com">digitalpixellar@gmail.com</a><span>Hyderabad · Bengaluru</span></div></div><div className="container copyright">© 2026 Pixellar Spaces · A Digital Pixellar venture <span>{isSupabaseConfigured ? "Live enquiry tracking" : "Setup mode"} · Privacy · Terms</span></div></footer>
 
-      {modal && <div className="modal-backdrop" onMouseDown={() => setModal(null)}><div className="modal" onMouseDown={e => e.stopPropagation()}><button className="modal-close" onClick={() => setModal(null)}>×</button>{sent ? <div className="success"><span>✓</span><h2>Thank you!</h2><p>Your request is ready in WhatsApp. Please tap send there to share it with our spaces team.</p><button className="dark-btn" onClick={() => setModal(null)}>Done</button></div> : <><span className="kicker">{modal === "owner" ? "PROPERTY OWNER" : modal === "visit" ? "SCHEDULE A VISIT" : "PERSONALISED SEARCH"}</span><h2>{modal === "owner" ? "List your property" : modal === "visit" ? `Visit ${selected?.title}` : "Tell us what you need"}</h2><p>Share a few details and our local team will take it from here.</p><form onSubmit={submitRequest}><div className="field-row"><label>Full name<input required name="name" placeholder="Your name"/></label><label>Phone number<input required name="phone" type="tel" inputMode="tel" placeholder="+91"/></label></div><div className="field-row"><label>City<select required name="city" value={formCity} onChange={e => setFormCity(e.target.value)}><option value="" disabled>Select city</option><option>Hyderabad</option><option>Bengaluru</option></select></label><label>{modal === "owner" ? "Property type" : "Looking for"}<select name="propertyType" value={formType} onChange={e => setFormType(e.target.value)}><option>Rental home</option><option>Office space</option></select></label></div><label>{modal === "owner" ? "Property locality" : "Budget and preferred locality"}<input name="locality" placeholder={modal === "owner" ? "e.g. Kondapur" : "e.g. ₹40,000, HSR Layout"}/></label><label>Anything else?<textarea name="details" placeholder="Move-in date, furnishing, size or other details"/></label><button className="orange-btn form-submit" type="submit">Continue on WhatsApp →</button></form></>}</div></div>}
+      {modal && <div className="modal-backdrop" onMouseDown={() => setModal(null)}><div className="modal" onMouseDown={e => e.stopPropagation()}><button className="modal-close" onClick={() => setModal(null)}>×</button>{sent ? <div className="success"><span>✓</span><h2>Thank you!</h2><p>Your request is ready in WhatsApp. Please tap send there to share it with our spaces team.</p><button className="dark-btn" onClick={() => setModal(null)}>Done</button></div> : <><span className="kicker">{modal === "owner" ? "PROPERTY OWNER" : modal === "visit" ? "SCHEDULE A VISIT" : "PERSONALISED SEARCH"}</span><h2>{modal === "owner" ? "List your property" : modal === "visit" ? `Visit ${selected?.title}` : "Tell us what you need"}</h2><p>Share a few details and our local team will take it from here.</p><form onSubmit={submitRequest}><div className="field-row"><label>Full name<input required name="name" placeholder="Your name"/></label><label>Phone number<input required name="phone" type="tel" inputMode="tel" placeholder="+91"/></label></div><div className="field-row"><label>City<select required name="city" value={formCity} onChange={e => setFormCity(e.target.value)}><option value="" disabled>Select city</option><option>Hyderabad</option><option>Bengaluru</option></select></label><label>{modal === "owner" ? "Property type" : "Looking for"}<select name="propertyType" value={formType} onChange={e => setFormType(e.target.value)}><option>Rental home</option><option>Office space</option></select></label></div>{modal === "visit"&&<div className="field-row"><label>Preferred visit date<input type="date" name="visitDate" required min={new Date().toISOString().slice(0,10)}/></label><label>Preferred time<input type="time" name="visitTime" required/></label></div>}<label>{modal === "owner" ? "Property locality" : "Budget and preferred locality"}<input name="locality" placeholder={modal === "owner" ? "e.g. Kondapur" : "e.g. ₹40,000, HSR Layout"}/></label><label>Anything else?<textarea name="details" placeholder="Move-in date, furnishing, size or other details"/></label><button className="orange-btn form-submit" type="submit">Continue on WhatsApp →</button></form></>}</div></div>}
     </main>
   );
 }

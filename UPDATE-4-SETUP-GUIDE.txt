@@ -1,0 +1,16 @@
+PIXELLAR SPACES — UPDATE 4 SETUP
+
+This update preserves all existing listings, owners, enquiries and admin users.
+
+1. SUPABASE: Run UPDATE-4-DATABASE-MIGRATION.sql in SQL Editor and confirm Success.
+2. GITHUB: Upload the CONTENTS of this extracted folder to the main page of the existing pixellar-spaces repository. Preserve the app, lib and public folders.
+3. Commit message: Add visit scheduling analytics and verification
+4. VERCEL: Wait for Ready / Production, then refresh /admin with Ctrl + Shift + R.
+
+TEST
+- Public site: schedule a visit with a date and time.
+- Admin > Visit calendar: reschedule it and open WhatsApp reminder.
+- Admin > Verification: verify one checked property.
+- Admin > Analytics: check funnel/localities and download CSV.
+
+No new environment variables are required.
