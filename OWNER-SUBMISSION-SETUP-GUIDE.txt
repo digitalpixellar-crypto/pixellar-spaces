@@ -1,0 +1,25 @@
+PIXELLAR SPACES — OWNER SUBMISSION UPDATE
+
+STEP 1 — SUPABASE
+1. Open Supabase > SQL Editor > New query.
+2. Open OWNER-SUBMISSION-DATABASE-MIGRATION.sql.
+3. Copy all SQL, paste it into the editor, and click Run.
+4. Confirm: Success. No rows returned.
+
+STEP 2 — GITHUB
+1. Extract this ZIP.
+2. Open the main page of your pixellar-spaces GitHub repository.
+3. Click Add file > Upload files.
+4. Upload the CONTENTS inside this extracted folder. Do not upload the ZIP.
+5. Replace existing files when prompted.
+6. Commit message: Add owner property submissions and approval workflow
+7. Click Commit changes. Vercel will deploy automatically.
+
+STEP 3 — TEST
+1. Wait for Vercel to show Ready / Production.
+2. Open /list-your-property and submit one test property with 2 photos.
+3. Open /admin > Owner submissions.
+4. Change Pending to Contacted, then approve it.
+5. Complete any missing listing details in Properties and publish it.
+
+Existing properties, leads, admin users and environment variables are preserved.

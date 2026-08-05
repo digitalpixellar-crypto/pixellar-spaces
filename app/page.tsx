@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { isSupabaseConfigured, supabase } from "@/lib/supabase";
 
 type Property = {
@@ -98,7 +99,7 @@ export default function Home() {
         <nav className="nav container">
           <a className="brand" href="#top" aria-label="Pixellar Spaces home"><span className="brand-mark">P</span><span>Pixellar <b>Spaces</b></span></a>
           <div className="nav-links"><a href="#properties">Homes</a><a href="#properties">Office spaces</a><a href="#how">How it works</a><a href="#manage">Property management</a></div>
-          <div className="nav-actions"><button className="text-btn" onClick={() => openModal("owner")}>List your property</button><button className="dark-btn" onClick={() => openModal("requirement")}>Find a space</button></div>
+          <div className="nav-actions"><Link className="text-btn" href="/list-your-property">List your property</Link><button className="dark-btn" onClick={() => openModal("requirement")}>Find a space</button></div>
         </nav>
       </header>
 
@@ -136,7 +137,7 @@ export default function Home() {
 
       <section className="how" id="how"><div className="container"><span className="kicker">SIMPLE. TRANSPARENT. SUPPORTED.</span><h2>Move in without the runaround</h2><div className="steps">{[["01","Tell us what fits","Share your city, budget and move-in date."],["02","Tour verified spaces","Visit only genuine, recently checked properties."],["03","Close with confidence","We coordinate terms, documents and handover."]].map(x => <div className="step" key={x[0]}><span>{x[0]}</span><div className="step-icon">{x[0] === "01" ? "⌕" : x[0] === "02" ? "⌂" : "✓"}</div><h3>{x[1]}</h3><p>{x[2]}</p></div>)}</div></div></section>
 
-      <section className="manage container" id="manage"><div><span className="kicker">FOR PROPERTY OWNERS</span><h2>Your property, professionally managed.</h2><p>From high-quality listings and tenant screening to rent coordination and maintenance support—we keep ownership simple.</p><ul><li>✓ Professional photos & verified listing</li><li>✓ Tenant screening & visit coordination</li><li>✓ Documentation & move-in support</li><li>✓ Optional ongoing property management</li></ul><button className="orange-btn" onClick={() => openModal("owner")}>List your property</button></div><div className="owner-panel"><div className="owner-building"><i/><i/><i/><i/><i/><i/></div><div className="metric"><small>OWNER EXPERIENCE</small><strong>One trusted team</strong><span>for every step of the rental journey</span></div></div></section>
+      <section className="manage container" id="manage"><div><span className="kicker">FOR PROPERTY OWNERS</span><h2>Your property, professionally managed.</h2><p>From high-quality listings and tenant screening to rent coordination and maintenance support—we keep ownership simple.</p><ul><li>✓ Professional photos & verified listing</li><li>✓ Tenant screening & visit coordination</li><li>✓ Documentation & move-in support</li><li>✓ Optional ongoing property management</li></ul><Link className="orange-btn" href="/list-your-property">List your property</Link></div><div className="owner-panel"><div className="owner-building"><i/><i/><i/><i/><i/><i/></div><div className="metric"><small>OWNER EXPERIENCE</small><strong>One trusted team</strong><span>for every step of the rental journey</span></div></div></section>
 
       <section className="cta"><div className="container"><div><span>READY WHEN YOU ARE</span><h2>Let’s find a space that works for you.</h2></div><button onClick={() => openModal("requirement")}>Share your requirement →</button></div></section>
       <footer><div className="container footer-grid"><div><div className="brand light"><span className="brand-mark">P</span><span>Pixellar <b>Spaces</b></span></div><p>Verified rental homes and ready-to-move office spaces in Hyderabad and Bengaluru.</p></div><div><b>Explore</b><a href="#properties">Rental homes</a><a href="#properties">Office spaces</a><a href="#how">How it works</a></div><div><b>For owners</b><a href="#manage">List a property</a><a href="#manage">Property management</a><a href="/admin">Team login</a></div><div><b>Contact</b><a href="tel:+917893817322">+91 78938 17322</a><a href="mailto:digitalpixellar@gmail.com">digitalpixellar@gmail.com</a><span>Hyderabad · Bengaluru</span></div></div><div className="container copyright">© 2026 Pixellar Spaces · A Digital Pixellar venture <span>{isSupabaseConfigured ? "Live enquiry tracking" : "Setup mode"} · Privacy · Terms</span></div></footer>
